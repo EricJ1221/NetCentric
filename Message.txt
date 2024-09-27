@@ -1,0 +1,29 @@
+ MY NAMEA BORAT! YAG SHEMASH ITS WORKING!
+
+ Need hash Method in both
+
+ send file in command line arg
+ start timer
+
+ Send file to server
+  Hash at server
+  Send hash back 
+
+  string compare
+
+Server Output Needed
+Server Waiting for client on port 9999x...
+Received file size in bits = 3524248     
+Received file SHA256 hash: 0Wn0jBnbViFc5RT9XPhlXSKOdxXmBW0SAtHorpkruyI= - Need to implement
+
+Client Output Needed
+Client Connecting to 192.168.0.41 on port 9999 -need to implement
+Just connected to /192.168.0.41:9999 - need to implement
+Successfully sent! - need to implement
+File name: myImage.png - need to implement
+SHA256 hash: 0Wn0jBnbViFc5RT9XPhlXSKOdxXmBW0SAtHorpkruyI= - need to implement
+File size in bits = 3524248 - need to implement
+Time taken (approx. one way) = 8.54 ms - need to implement
+Throughput = 412.85 Mbps - need to implement
+
+

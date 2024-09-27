@@ -1,60 +1,71 @@
 import java.io.*;
 import java.net.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
-public class EOliverTCPServer 
-{
-	
-	public static void main(String[] args) 
-	{
-				
-		ServerSocket serverSocket;
-		
-		try 
-		{
-                /* (1) The server runs on port 9999 on one machine. When server starts it should display: “Waiting for
-                client on port 9999...” (without quotes)*/
+public class EOliverTCPServer {
 
-			   serverSocket = new ServerSocket(9999); //creates a socket and binds it to port 9999
-			   //serverSocket = new ServerSocket(0); //creates a socket and binds it to next available port 
-			   
-			   while (true)
-			   {
-			   
-				   System.out.println("TCP Server waiting for client on port " + serverSocket.getLocalPort() + "...");
-				   
-				   Socket connectionSocket = serverSocket.accept();  //listens for connection and 
-				   										// creates a connection socket for communication
-				   
-				   System.out.println("Just connected server port # " + connectionSocket.getLocalSocketAddress() + " to client port # " + connectionSocket.getRemoteSocketAddress());
-				   
-				   DataInputStream in = new DataInputStream(connectionSocket.getInputStream()); //get incoming data in bytes from connection socket
-				   
-				   String outText = in.readUTF();
-				   
-				   System.out.println("RECEIVED: from IPAddress " + 
-							connectionSocket.getInetAddress() + " and from port " + connectionSocket.getPort() + " the data: " + outText);
-				   
-				   outText = outText.toUpperCase();
+    // Helper method to compute SHA-256 hash
+    private static String computeSHA256(byte[] data) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = digest.digest(data);  // Compute the hash
 
-                /* (3) When the server receives the file, the server should compute the SHA256 hash code for the file and
-                should return that hash code to the client. Server should also print to the console the file size in bits and
-                the computed hash code. This is shown in the right column of the top row in Table 1*/
+        // Convert the byte array into a hexadecimal string
+        StringBuilder hashString = new StringBuilder();
+        for (byte b : hashBytes) {
+            hashString.append(String.format("%02x", b));
+        }
+        return hashString.toString();
+    }
 
-				   
-				   DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream()); //setup a stream for outgoing bytes of data
-				   
-				   out.writeUTF(outText);
-				   
-				   connectionSocket.close();  //close connection socket after this exchange
-				   
-				   System.out.println();
-			   }
-	
-		} 
-		catch (IOException e)
-		{
-				e.printStackTrace();
-		}
-	}
+    public static void main(String[] args) {
+        ServerSocket serverSocket;
 
+        try {
+            // The server runs on port 9999
+            serverSocket = new ServerSocket(9999); // Create a socket and bind it to port 9999
+            System.out.println("Server waiting for client on port " + serverSocket.getLocalPort() + "...");
+
+            while (true) {
+                // Wait for a client connection
+                Socket connectionSocket = serverSocket.accept();
+                System.out.println("Client connected from: " + connectionSocket.getRemoteSocketAddress());
+
+                DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
+                DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
+
+                try {
+                    // 1. Receive the file name or file data from the client
+                    String fileName = in.readUTF();  // Expecting the client to send the file name
+                    System.out.println("Received file name: " + fileName);
+
+                    // 2. Receive the file size
+                    int fileLength = in.readInt();  // Expecting the client to send the file size
+                    System.out.println("Expected file size in bytes: " + fileLength);
+
+                    // 3. Receive the file content (fileBytes) from the client
+                    byte[] fileBytes = new byte[fileLength];
+                    in.readFully(fileBytes);  // Read the file bytes sent by the client
+                    System.out.println("Received file content of size: " + fileBytes.length + " bytes");
+
+                    // 4. Compute SHA-256 hash for the received file
+                    String fileHash = computeSHA256(fileBytes);
+                    System.out.println("Computed SHA-256 hash of received file: " + fileHash);
+
+                    // 5. Send the computed hash back to the client
+                    out.writeUTF(fileHash);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                // Close the connection after processing the client
+                connectionSocket.close();
+                System.out.println("Connection closed.");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
