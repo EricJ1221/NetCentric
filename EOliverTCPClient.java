@@ -31,22 +31,24 @@ public class EOliverTCPClient
                 return;
             }
 
-            // Calculate the size of the file in bits
-            long fileSizeInBytes = file.length();  // Get the file size in bytes
-            fileSizeInBits = fileSizeInBytes * 8;  // Convert to bits
-            System.out.println("File size in bits = " + fileSizeInBits);
-
-            byte[] fileBytes = Files.readAllBytes(file.toPath());  // Read file as bytes
-            fileHash = computeSHA256(fileBytes);  // Compute SHA-256 hash
-            System.out.println("Computed file SHA256 hash: " + fileHash);
-
             // Create socket for connecting to server
             Socket clientSocket = new Socket(serverName, port);  
             System.out.println("Connecting to " + serverName + " on port " + port + "...");
             System.out.println("Just connected to " + clientSocket.getRemoteSocketAddress());
+            System.out.println("Successfully sent");
+            System.out.println("File name: " + args[1]);
 
             OutputStream outToServer = clientSocket.getOutputStream();  // Stream of bytes
             DataOutputStream out = new DataOutputStream(outToServer);
+
+            byte[] fileBytes = Files.readAllBytes(file.toPath());  // Read file as bytes
+            fileHash = computeSHA256(fileBytes);  // Compute SHA-256 hash
+            System.out.println("SHA256 hash: " + fileHash + "=");
+
+            // Calculate the size of the file in bits
+            long fileSizeInBytes = file.length();  // Get the file size in bytes
+            fileSizeInBits = fileSizeInBytes * 8;  // Convert to bits
+            System.out.println("File size in bits = " + fileSizeInBits);
             
             // Send file name
             out.writeUTF(file.getName());
@@ -64,14 +66,14 @@ public class EOliverTCPClient
             InputStream inFromServer = clientSocket.getInputStream();  // Stream of bytes
             DataInputStream in = new DataInputStream(inFromServer);
             String serverHash = in.readUTF();  // Read the hash from the server
-            System.out.println("SHA256 hash from server: " + serverHash);
-
+            
             // Stop the timer when response is received
             long endTime = System.currentTimeMillis();  // End timer
+            //System.out.println("SHA256 hash from server: " + serverHash);
+
             long elapsedTime = endTime - startTime;  // Calculate elapsed time in milliseconds
             double elapsedTimeInSeconds = elapsedTime / 1000.0;  // Convert milliseconds to seconds
-
-            System.out.println("Time taken for server response: " + elapsedTime + " milliseconds");
+            System.out.println("Time taken (approx. one way): " + elapsedTime + " ms");
 
             // Compare the client-side hash with the server-side hash
             if (fileHash.equals(serverHash)) {

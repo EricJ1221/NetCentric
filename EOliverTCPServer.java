@@ -24,12 +24,12 @@ public class EOliverTCPServer {
         try {
             // The server runs on port 9999
             serverSocket = new ServerSocket(9999); // Create a socket and bind it to port 9999
-            System.out.println("Server waiting for client on port " + serverSocket.getLocalPort() + "...");
+            System.out.println("Waiting for client on port " + serverSocket.getLocalPort() + "...");
 
             while (true) {
                 // Wait for a client connection
                 Socket connectionSocket = serverSocket.accept();
-                System.out.println("Client connected from: " + connectionSocket.getRemoteSocketAddress());
+                //System.out.println("Client connected from: " + connectionSocket.getRemoteSocketAddress());
 
                 DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
                 DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
@@ -37,20 +37,21 @@ public class EOliverTCPServer {
                 try {
                     // 1. Receive the file name or file data from the client
                     String fileName = in.readUTF();  // Expecting the client to send the file name
-                    System.out.println("Received file name: " + fileName);
+                    //System.out.println("Received file name: " + fileName);
 
                     // 2. Receive the file size
                     int fileLength = in.readInt();  // Expecting the client to send the file size
-                    System.out.println("Expected file size in bytes: " + fileLength);
+                    //System.out.println("Expected file size in bytes: " + fileLength);
 
                     // 3. Receive the file content (fileBytes) from the client
                     byte[] fileBytes = new byte[fileLength];
                     in.readFully(fileBytes);  // Read the file bytes sent by the client
-                    System.out.println("Received file content of size: " + fileBytes.length + " bytes");
+                    int fileSizeInBits = fileBytes.length * 8;
+                    System.out.println("Received file content of size: " + fileSizeInBits + " bits");
 
                     // 4. Compute SHA-256 hash for the received file
                     String fileHash = computeSHA256(fileBytes);
-                    System.out.println("Computed SHA-256 hash of received file: " + fileHash);
+                    System.out.println("Received file SHA-256 hash: " + fileHash + "=");
 
                     // 5. Send the computed hash back to the client
                     out.writeUTF(fileHash);
